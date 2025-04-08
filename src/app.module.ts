@@ -22,7 +22,8 @@ import { UserModule } from './users/users.module';
       // logging: true,
     }),
     AuthModule,
-    UserModule],
+    UserModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
