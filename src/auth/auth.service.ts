@@ -43,7 +43,7 @@ export class AuthService {
     const user = await this.userRepository
       .createQueryBuilder('user')
       .where('user.username = :username', { username: loginDto.username })
-      .addSelect('user.password') 
+      .addSelect('user.password')
       .getOne();
 
     if (!user) {
