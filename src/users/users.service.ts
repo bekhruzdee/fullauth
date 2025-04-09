@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -102,22 +102,22 @@ export class UsersService {
     const existingUser = await this.usersRepository.findOne({
       where: { id: userId },
     });
-
+  
     if (!existingUser) {
-      return {
-        success: false,
-        message: 'User not found❌',
-      };
+      throw new HttpException(
+        'User Not Found❌',
+        HttpStatus.NOT_FOUND, 
+      );
     }
-
+  
     await this.usersRepository.update(userId, updateUserDto);
     const updatedUser = await this.usersRepository.findOne({
       where: { id: userId },
     });
-
+  
     return {
       success: true,
-      message: 'User updated successfully',
+      message: 'User updated successfully✅',
       data: updatedUser || undefined,
     };
   }
@@ -126,19 +126,19 @@ export class UsersService {
     const existingUser = await this.usersRepository.findOne({
       where: { id: userId },
     });
-
+  
     if (!existingUser) {
-      return {
-        success: false,
-        message: 'User not found',
-      };
+      throw new HttpException(
+        'User Not Found❌',
+        HttpStatus.NOT_FOUND, 
+      );
     }
-
+  
     await this.usersRepository.delete(userId);
-
+  
     return {
       success: true,
-      message: 'User deleted successfully',
+      message: 'User deleted successfully✅',
     };
   }
 }
