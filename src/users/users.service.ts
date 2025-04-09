@@ -19,23 +19,23 @@ export class UsersService {
     const existingUser = await this.usersRepository.findOne({
       where: { email: createAdminDto.email },
     });
-
+  
     if (existingUser) {
-      return {
-        success: false,
-        message: 'User already exists',
-      };
+      throw new HttpException(
+        'User with that email already exists',
+        HttpStatus.CONFLICT, 
+      );
     }
-
+  
     const hashedPassword = await bcrypt.hash(createAdminDto.password, 10);
-
+  
     const newAdmin = this.usersRepository.create({
       ...createAdminDto,
       password: hashedPassword,
     });
-
+  
     const savedAdmin = await this.usersRepository.save(newAdmin);
-
+  
     return {
       success: true,
       message: 'Admin created successfully✅',
@@ -51,22 +51,18 @@ export class UsersService {
     const admins = await this.usersRepository.find({
       where: { role: 'admin' },
     });
-
+  
     if (!admins.length) {
-      return {
-        success: false,
-        message: 'No admins found❌',
-        data: [],
-      };
+      throw new NotFoundException('No admins found❌'); 
     }
-
+  
     return {
       success: true,
       message: 'Admins retrieved successfully✅',
       data: admins,
     };
   }
-
+  
   async findAll(): Promise<{
     success: boolean;
     message: string;
@@ -75,23 +71,28 @@ export class UsersService {
     const users = await this.usersRepository.find({
       select: ['id', 'username', 'email', 'role', 'created_at', 'updated_at'],
     });
+  
+    if (!users.length) {
+      throw new NotFoundException('No users found❌');  
+    }
+  
     return {
       success: true,
       message: 'Users data retrieved successfully',
       data: users,
     };
   }
-
+  
   async findOne(id: number): Promise<Omit<User, 'password'>> {
     const user = await this.usersRepository.findOne({
       where: { id },
       select: ['id', 'username', 'email', 'role', 'created_at', 'updated_at'],
     });
-
+  
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`User with ID ${id} not found`);  
     }
-
+  
     return user;
   }
 
