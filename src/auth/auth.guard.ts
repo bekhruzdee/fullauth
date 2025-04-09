@@ -31,7 +31,6 @@ export class AuthGuard {
       request.user = payload;
       return true;
     } catch (error) {
-      console.error('JWT verification failed:', error.message);
       if (error.name === 'TokenExpiredError') {
         throw new UnauthorizedException('Token has expired');
       } else {
