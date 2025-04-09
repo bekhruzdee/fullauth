@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -13,29 +18,60 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
+  async createSuperAdmin(
+    createAdminDto: CreateAdminDto,
+  ): Promise<{ success: boolean; message: string; data?: User }> {
+    const existingUser = await this.usersRepository.findOne({
+      where: { email: createAdminDto.email },
+    });
+
+    if (existingUser) {
+      throw new HttpException(
+        'User with that email already exists',
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(createAdminDto.password, 10);
+
+    const newSuperAdmin = this.usersRepository.create({
+      ...createAdminDto,
+      password: hashedPassword,
+      role: 'super_admin',
+    });
+
+    const savedSuperAdmin = await this.usersRepository.save(newSuperAdmin);
+
+    return {
+      success: true,
+      message: 'Superadmin created successfully✅',
+      data: savedSuperAdmin,
+    };
+  }
+
   async createAdmin(
     createAdminDto: CreateAdminDto,
   ): Promise<{ success: boolean; message: string; data?: User }> {
     const existingUser = await this.usersRepository.findOne({
       where: { email: createAdminDto.email },
     });
-  
+
     if (existingUser) {
       throw new HttpException(
         'User with that email already exists',
-        HttpStatus.CONFLICT, 
+        HttpStatus.CONFLICT,
       );
     }
-  
+
     const hashedPassword = await bcrypt.hash(createAdminDto.password, 10);
-  
+
     const newAdmin = this.usersRepository.create({
       ...createAdminDto,
       password: hashedPassword,
     });
-  
+
     const savedAdmin = await this.usersRepository.save(newAdmin);
-  
+
     return {
       success: true,
       message: 'Admin created successfully✅',
@@ -51,18 +87,18 @@ export class UsersService {
     const admins = await this.usersRepository.find({
       where: { role: 'admin' },
     });
-  
+
     if (!admins.length) {
-      throw new NotFoundException('No admins found❌'); 
+      throw new NotFoundException('No admins found❌');
     }
-  
+
     return {
       success: true,
       message: 'Admins retrieved successfully✅',
       data: admins,
     };
   }
-  
+
   async findAll(): Promise<{
     success: boolean;
     message: string;
@@ -71,28 +107,28 @@ export class UsersService {
     const users = await this.usersRepository.find({
       select: ['id', 'username', 'email', 'role', 'created_at', 'updated_at'],
     });
-  
+
     if (!users.length) {
-      throw new NotFoundException('No users found❌');  
+      throw new NotFoundException('No users found❌');
     }
-  
+
     return {
       success: true,
       message: 'Users data retrieved successfully',
       data: users,
     };
   }
-  
+
   async findOne(id: number): Promise<Omit<User, 'password'>> {
     const user = await this.usersRepository.findOne({
       where: { id },
       select: ['id', 'username', 'email', 'role', 'created_at', 'updated_at'],
     });
-  
+
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);  
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
-  
+
     return user;
   }
 
@@ -103,19 +139,16 @@ export class UsersService {
     const existingUser = await this.usersRepository.findOne({
       where: { id: userId },
     });
-  
+
     if (!existingUser) {
-      throw new HttpException(
-        'User Not Found❌',
-        HttpStatus.NOT_FOUND, 
-      );
+      throw new HttpException('User Not Found❌', HttpStatus.NOT_FOUND);
     }
-  
+
     await this.usersRepository.update(userId, updateUserDto);
     const updatedUser = await this.usersRepository.findOne({
       where: { id: userId },
     });
-  
+
     return {
       success: true,
       message: 'User updated successfully✅',
@@ -127,16 +160,13 @@ export class UsersService {
     const existingUser = await this.usersRepository.findOne({
       where: { id: userId },
     });
-  
+
     if (!existingUser) {
-      throw new HttpException(
-        'User Not Found❌',
-        HttpStatus.NOT_FOUND, 
-      );
+      throw new HttpException('User Not Found❌', HttpStatus.NOT_FOUND);
     }
-  
+
     await this.usersRepository.delete(userId);
-  
+
     return {
       success: true,
       message: 'User deleted successfully✅',
