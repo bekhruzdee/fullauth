@@ -6,8 +6,6 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import * as dotenv from 'dotenv';
-dotenv.config();
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -24,20 +22,19 @@ export class AuthGuard implements CanActivate {
     const [type, token] = authHeader.split(' ');
 
     if (type !== 'Bearer' || !token) {
-      throw new UnauthorizedException('Invalid authorization format');
+      throw new UnauthorizedException('Invalid or missing token');
     }
 
     try {
-      const payload = await this.jwtService.verify(token, {
+      const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
 
       const { iat, exp, ...userData } = payload;
       request['user'] = userData;
+      return true;
     } catch (error) {
       throw new UnauthorizedException('Invalid token or token expired');
     }
-
-    return true;
   }
 }
