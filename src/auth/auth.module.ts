@@ -5,7 +5,6 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import googleOauthConfig from 'src/config/google-oauth.config';
 
 @Module({
   imports: [
@@ -14,8 +13,7 @@ import googleOauthConfig from 'src/config/google-oauth.config';
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRES_IN },
-    }),
-    ConfigModule.forFeature(googleOauthConfig),
+    })
   ],
   controllers: [AuthController],
   providers: [AuthService],
