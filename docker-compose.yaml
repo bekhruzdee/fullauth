@@ -1,4 +1,36 @@
-version: '3.8'
+# version: '3.8'
+# services:
+#   postgres:
+#     image: postgres
+#     restart: always
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: 2512
+#       POSTGRES_DB: fullauth
+#     networks:
+#       - bekhruz
+
+#   full-auth:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     ports:
+#       - '3000:3000'
+#     depends_on:
+#       - postgres
+#     environment:
+#       DATABASE_HOST: postgres
+#       DATABASE_PORT: 5432
+#       DATABASE_USERNAME: postgres
+#       DATABASE_PASSWORD: 2512
+#       DATABASE_NAME: fullauth
+#     networks:
+#       - bekhruz
+
+# networks:
+#   bekhruz:
+#     driver: bridge
+
 services:
   postgres:
     image: postgres
@@ -10,6 +42,17 @@ services:
     networks:
       - bekhruz
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'     # AMQP
+      - '15672:15672'   # Web UI
+    environment:
+      RABBITMQ_DEFAULT_USER: bekhruz
+      RABBITMQ_DEFAULT_PASS: 2512 
+    networks:
+      - bekhruz
+
   full-auth:
     build:
       context: .
@@ -18,12 +61,14 @@ services:
       - '3000:3000'
     depends_on:
       - postgres
+      - rabbitmq
     environment:
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: 2512
       DATABASE_NAME: fullauth
+      RABBITMQ_URL: amqp://bekhruz:2512@rabbitmq:5672 
     networks:
       - bekhruz
 

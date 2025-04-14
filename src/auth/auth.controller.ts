@@ -32,11 +32,8 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(AuthGuard)
   logout(@Res() res: Response) {
-    const result = this.authService.logout();
-    res.clearCookie('token');
-    return res.status(200).json(result);
+    return this.authService.logout(res); // resni yuboring
   }
 
   @UseGuards(AuthGuard, RolesGuard)

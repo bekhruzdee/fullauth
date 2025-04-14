@@ -69,12 +69,19 @@ export class AuthService {
     return res.json({ userData, access_token: accessToken });
   }
 
-  logout(): { message: string } {
-    return { message: 'Logout successfully✅' };
+  logout(res: Response): { message: string } {
+    res.clearCookie('refresh_token'); 
+    return { message: 'Logged out successfully ✅' };
   }
 
   async getAllMyData(payload: any) {
     const user = await this.userRepository.findOneBy({ id: payload.id });
-    return user;
-  }
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const { password, ...userData } = user;
+    return userData;
+  } 
 }
