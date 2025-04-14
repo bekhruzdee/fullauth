@@ -5,7 +5,6 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // RabbitMQ microservice ulangan qismi
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
@@ -19,6 +18,8 @@ async function bootstrap() {
 
   await app.startAllMicroservices();
   await app.listen(process.env.PORT || 3000);
-  console.log(`🚀 Application is running on: http://localhost:${process.env.PORT || 3000}`);
+  console.log(
+    `🚀 Application is running on: http://localhost:${process.env.PORT || 3000}`,
+  );
 }
 bootstrap();
